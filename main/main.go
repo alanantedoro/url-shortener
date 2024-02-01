@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	urlshortener "github.com/alanantedoro/url-shortener"
 )
 
 func main() {
@@ -14,8 +16,6 @@ func main() {
 	}
 	mapHandler := urlshortener.MapHandler(pathsToUrls, mux)
 
-	// Build the YAMLHandler using the mapHandler as the
-	// fallback
 	yaml := `
 - path: /urlshort
   url: https://github.com/gophercises/urlshort
@@ -39,3 +39,4 @@ func defaultMux() *http.ServeMux {
 func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world!")
 }
+
