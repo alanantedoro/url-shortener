@@ -16,13 +16,12 @@ func main() {
 	var yamlFile, jsonFile, boltDB string
 	 flag.StringVar(&yamlFile,"yaml","","a yaml file in the format of 'path and url'")
 	flag.StringVar(&jsonFile,"json","","a json file in the format of 'path and url'")
-	flag.StringVar(&boltDB,"json","","a json file in the format of 'path and url'")
+	flag.StringVar(&boltDB,"bolt","","a json file in the format of 'path and url'")
 
 	flag.Parse()
 	mux := defaultMux()
 
-
-
+	
 	pathsToUrls := map[string]string{
 		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
 		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
@@ -53,10 +52,24 @@ func main() {
 		fmt.Println("Starting the server on :8080")
 		http.ListenAndServe(":8080", jsonHandler)
 	} else if(boltDB != ""){
-		db, err := bolt.Open("my.db", 0600, nil)
+		db, err := bolt.Open(boltDB, 0600, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// Just for setting up a record in the db in the first run
+		// db.Update(func(tx *bolt.Tx) error {
+		// 	b, err := tx.CreateBucketIfNotExists([]byte("MyBucket"))
+		// 	if err != nil {
+		// 		return fmt.Errorf("create bucket: %s", err)
+		// 	}
+		
+		// 	if err := b.Put([]byte("/bolt"), []byte("https://pkg.go.dev/github.com/boltdb/bolt")); err != nil {
+		// 		return fmt.Errorf("put data: %s", err)
+		// 	}
+		
+		// 	return nil
+		// })
 
 		boltHandler := urlshortener.BOLThanlder(db,mapHandler)
 		fmt.Println("Starting the server on :8080")
@@ -76,4 +89,5 @@ func defaultMux() *http.ServeMux {
 func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world!")
 }
+
 
