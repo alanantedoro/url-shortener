@@ -3,17 +3,21 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
 	urlshortener "github.com/alanantedoro/url-shortener"
+	"github.com/boltdb/bolt"
 )
 
 
 func main() {
-	var yamlFile, jsonFile string
+	var yamlFile, jsonFile, boltDB string
 	 flag.StringVar(&yamlFile,"yaml","","a yaml file in the format of 'path and url'")
 	flag.StringVar(&jsonFile,"json","","a json file in the format of 'path and url'")
+	flag.StringVar(&boltDB,"json","","a json file in the format of 'path and url'")
+
 	flag.Parse()
 	mux := defaultMux()
 
@@ -48,6 +52,17 @@ func main() {
 		}
 		fmt.Println("Starting the server on :8080")
 		http.ListenAndServe(":8080", jsonHandler)
+	} else if(boltDB != ""){
+		db, err := bolt.Open("my.db", 0600, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		boltHandler := urlshortener.BOLThanlder(db,mapHandler)
+		fmt.Println("Starting the server on :8080")
+		http.ListenAndServe(":8080", boltHandler)
+
+		defer db.Close()
 	}
 
 }
